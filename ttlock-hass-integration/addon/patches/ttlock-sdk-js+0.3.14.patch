@@ -1,0 +1,53 @@
+diff --git a/node_modules/ttlock-sdk-js/dist/device/TTBluetoothDevice.js b/node_modules/ttlock-sdk-js/dist/device/TTBluetoothDevice.js
+index 0beefba..d3fe730 100644
+--- a/node_modules/ttlock-sdk-js/dist/device/TTBluetoothDevice.js
++++ b/node_modules/ttlock-sdk-js/dist/device/TTBluetoothDevice.js
+@@ -182,7 +182,7 @@ class TTBluetoothDevice extends TTDevice_1.TTDevice {
+                             // wait for a response
+                             // console.log("Waiting for response");
+                             let cycles = 0;
+-                            while (this.responses.length == 0 && this.connected) {
++                            while (this.responses.length == 0 && this.connected && cycles * 5 < 50000) {
+                                 cycles++;
+                                 await timingUtil_1.sleep(5);
+                             }
+diff --git a/node_modules/ttlock-sdk-js/dist/scanner/noble/NobleScanner.js b/node_modules/ttlock-sdk-js/dist/scanner/noble/NobleScanner.js
+index 19e9f3c..813a186 100644
+--- a/node_modules/ttlock-sdk-js/dist/scanner/noble/NobleScanner.js
++++ b/node_modules/ttlock-sdk-js/dist/scanner/noble/NobleScanner.js
+@@ -53,11 +53,12 @@ class NobleScanner extends events_1.EventEmitter {
+     }
+     async startNobleScan(allowDuplicates = true) {
+         try {
+-            if (typeof this.noble != "undefined") {
++            if (typeof this.noble != "undefined" && this.scannerState != "scanning") {
+                 await this.noble.startScanningAsync(this.uuids, allowDuplicates);
+                 this.scannerState = "scanning";
+                 return true;
+             }
++            return true;
+         }
+         catch (error) {
+             console.error(error);
+@@ -69,11 +70,19 @@ class NobleScanner extends events_1.EventEmitter {
+     }
+     async stopNobleScan() {
+         try {
+-            if (typeof this.noble != "undefined") {
+-                await this.noble.stopScanningAsync();
++            if (typeof this.noble != "undefined" && this.scannerState != "stopped") {
++                await new Promise((res,rej)=>{
++                    let cbk = res
++                    this.noble.stopScanningAsync().then(()=>cbk&&cbk(true));
++                    setTimeout(()=>{
++                        cbk=null
++                        res(false)
++                    }, 1000)
++                }) 
+                 this.scannerState = "stopped";
+                 return true;
+             }
++            return true;
+         }
+         catch (error) {
+             console.error(error);
