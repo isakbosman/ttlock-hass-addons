@@ -1,5 +1,5 @@
 {
-  "name": "TTLock integration",
-  "url": "https://github.com/z-jack/ttlock-hass-addons",
-  "maintainer": "JackZ <404@jackz.cn>"
+  "name": "TTLock",
+  "url": "https://github.com/isakbosman/ttlock-hass-addons",
+  "maintainer": "Isak Bosman <profbosman@gmail.com>"
 }
